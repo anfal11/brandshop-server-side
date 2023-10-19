@@ -56,12 +56,6 @@ async function run() {
     })
 
     // to update products
-    // app.get('/addProduct/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await productCollection.findOne(query);
-    //   res.send(result);
-    // })
     app.get('/updateProduct/:id', async (req, res) => {
       const id = req.params.id;
       if (!ObjectId.isValid(id)) {
@@ -77,6 +71,28 @@ async function run() {
       const brand = req.params.brand;
       const query = { brand: brand };
       const result = await productCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // update data
+
+    app.put('/updateProduct/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedProduct = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: updatedProduct.name,
+          type: updatedProduct.type, 
+          brand: updatedProduct.brand, 
+          price: updatedProduct.price, 
+          description: updatedProduct.description, 
+          rating: updatedProduct.rating, 
+          image: updatedProduct.image,
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc, options);
       res.send(result);
     })
 
