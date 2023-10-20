@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,11 +9,9 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// username  (ratulcse1)
-// password (QEdnpEF6Uh1JsXKn)
 
 const uri =
-  "mongodb+srv://ratulcse1:QEdnpEF6Uh1JsXKn@cluster0.ey8cr7h.mongodb.net/?retryWrites=true&w=majority";
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ey8cr7h.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -24,12 +23,10 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const database = client.db("brand").collection("brandCOllection");
-    const productCollection = client
-      .db("brand")
-      .collection("productCollection");
+    const productCollection = client.db("brand").collection("productCollection");
     const cartCollection = client.db("brand").collection("cartCollection");
 
     // data brand
@@ -63,8 +60,17 @@ async function run() {
       res.send(result);
     });
 
+    // cart delete
+    app.delete("/myCart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: id };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
     // all product show
-    app.get("/addProduct/", async (req, res) => {
+    app.get("/addProduct", async (req, res) => {
       const cursor = productCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -123,10 +129,10 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // await client.close();
   }
